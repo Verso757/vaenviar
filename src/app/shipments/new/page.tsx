@@ -8,10 +8,6 @@ function generateShipmentCode() {
   return `ENV-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 }
 
-type FormState = {
-  error?: string;
-};
-
 type PageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
 };
@@ -30,7 +26,7 @@ export default async function NewShipmentPage(props: PageProps) {
 
   const error = typeof props.searchParams?.error === "string" ? props.searchParams.error : null;
 
-  async function createShipmentAction(formData: FormData): Promise<FormState> {
+  async function createShipmentAction(formData: FormData): Promise<void> {
     "use server";
 
     const currentUser = await requireUser();
