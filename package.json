@@ -16,11 +16,11 @@
     "location:create": "node scripts/create-location.mjs"
   },
   "dependencies": {
-    "@prisma/client": "^7.4.1",
+    "@prisma/client": "6.19.2",
     "bcryptjs": "^3.0.3",
     "next": "16.1.6",
     "nodemailer": "^8.0.1",
-    "prisma": "^7.4.1",
+    "prisma": "6.19.2",
     "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3"
