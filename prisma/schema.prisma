@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+  GUARD
+}
+
+enum ShipmentStatus {
+  CREATED
+  WAITING_PICKUP
+  IN_TRANSIT
+  RECEIVED_AT_DESTINATION
+  DELIVERED
+  CANCELLED
+}
+
+enum ShipmentEventType {
+  CREATED
+  HANDED_TO_DRIVER
+  RECEIVED_AT_DESTINATION
+  DELIVERED
+  CANCELLED
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users          User[]
+  shipmentsFrom  Shipment[] @relation("FromLocation")
+  shipmentsTo    Shipment[] @relation("ToLocation")
+  events         ShipmentEvent[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(EMPLOYEE)
+  locationId   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  location           Location? @relation(fields: [locationId], references: [id])
+  sessions           Session[]
+  shipmentsCreated   Shipment[] @relation("CreatedBy")
+  shipmentsRecipient Shipment[] @relation("Recipient")
+  events             ShipmentEvent[] @relation("EventByUser")
+  createdDrivers     Driver[]
+  signatures         DeliverySignature[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Driver {
+  id          String   @id @default(cuid())
+  name        String
+  createdAt   DateTime @default(now())
+  createdById String?
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  events    ShipmentEvent[]
+
+  @@index([name])
+}
+
+model Shipment {
+  id             String         @id @default(cuid())
+  code           String         @unique
+  status         ShipmentStatus @default(CREATED)
+  description    String?
+
+  fromLocationId String
+  toLocationId   String
+  createdById    String
+  recipientId    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fromLocation Location @relation("FromLocation", fields: [fromLocationId], references: [id])
+  toLocation   Location @relation("ToLocation", fields: [toLocationId], references: [id])
+  createdBy    User     @relation("CreatedBy", fields: [createdById], references: [id])
+  recipient    User     @relation("Recipient", fields: [recipientId], references: [id])
+
+  packages   ShipmentPackage[]
+  events     ShipmentEvent[]
+  signatures DeliverySignature[]
+
+  @@index([status])
+  @@index([fromLocationId])
+  @@index([toLocationId])
+  @@index([recipientId])
+}
+
+model ShipmentPackage {
+  id          String @id @default(cuid())
+  shipmentId  String
+  label       String
+  sequence    Int
+  description String?
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@unique([shipmentId, sequence])
+  @@index([shipmentId])
+}
+
+model ShipmentEvent {
+  id         String           @id @default(cuid())
+  shipmentId String
+  type       ShipmentEventType
+  payload    Json?
+  createdAt  DateTime         @default(now())
+
+  locationId String?
+  userId     String?
+  driverId   String?
+  driverName String?
+
+  shipment Shipment   @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  location Location?  @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  user     User?      @relation("EventByUser", fields: [userId], references: [id], onDelete: SetNull)
+  driver   Driver?    @relation(fields: [driverId], references: [id], onDelete: SetNull)
+
+  signature DeliverySignature?
+
+  @@index([shipmentId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model DeliverySignature {
+  id            String   @id @default(cuid())
+  shipmentId    String
+  eventId       String   @unique
+  signedByName  String
+  signedById    String?
+  signatureData String
+  createdAt     DateTime @default(now())
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  event    ShipmentEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  signedBy User?    @relation(fields: [signedById], references: [id], onDelete: SetNull)
+
+  @@index([shipmentId])
+}
