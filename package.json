@@ -10,6 +10,7 @@
     "lint": "eslint",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "user:create": "node scripts/create-user.mjs",
     "location:create": "node scripts/create-location.mjs"
