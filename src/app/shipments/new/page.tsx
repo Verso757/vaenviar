@@ -1,7 +1,9 @@
 import crypto from "crypto";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { getPrisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 import { sendShipmentMilestoneEmail } from "@/lib/email";
 
 function generateShipmentCode() {
@@ -14,6 +16,8 @@ type PageProps = {
 
 export default async function NewShipmentPage(props: PageProps) {
   const user = await requireUser();
+
+  const prisma = getPrisma();
 
   if (user.role === "GUARD") {
     redirect("/");
@@ -31,6 +35,8 @@ export default async function NewShipmentPage(props: PageProps) {
 
     const currentUser = await requireUser();
     if (currentUser.role === "GUARD") redirect("/");
+
+    const prisma = getPrisma();
 
     const fromLocationId = String(formData.get("fromLocationId") ?? "").trim();
     const toLocationId = String(formData.get("toLocationId") ?? "").trim();

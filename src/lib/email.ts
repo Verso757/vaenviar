@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { prisma } from "@/lib/db";
+import { getPrisma } from "@/lib/db";
 
 type ShipmentMailEvent =
   | "CREATED"
@@ -33,6 +33,8 @@ export async function sendShipmentMilestoneEmail(args: {
   extra?: { driverName?: string; signedByName?: string };
 }) {
   if (!isEmailEnabled()) return;
+
+  const prisma = getPrisma();
 
   const transport = getTransport();
   if (!transport) return;

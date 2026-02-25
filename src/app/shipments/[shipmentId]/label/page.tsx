@@ -1,9 +1,11 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
-import { prisma } from "@/lib/db";
+import { getPrisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { PrintButton } from "./PrintButton";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: { shipmentId: string };
@@ -13,6 +15,7 @@ export default async function ShipmentLabelPage(props: PageProps) {
   await requireUser();
   const { shipmentId } = props.params;
 
+  const prisma = getPrisma();
   const shipment = await prisma.shipment.findUnique({
     where: { id: shipmentId },
     include: {

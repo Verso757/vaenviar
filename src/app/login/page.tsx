@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/db";
+import { getPrisma } from "@/lib/db";
 import { createSessionForUser, getCurrentUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
@@ -17,6 +19,8 @@ export default async function LoginPage(props: PageProps) {
 
   async function loginAction(formData: FormData) {
     "use server";
+
+    const prisma = getPrisma();
 
     const email = String(formData.get("email") ?? "")
       .trim()

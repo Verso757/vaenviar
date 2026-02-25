@@ -1,8 +1,10 @@
 import { redirect, notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { getPrisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { SignaturePad } from "../SignaturePad";
 import { sendShipmentMilestoneEmail } from "@/lib/email";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: { shipmentId: string };
@@ -15,6 +17,8 @@ export default async function GuardDeliverShipmentPage(props: PageProps) {
   if (!user.locationId) redirect("/guard/deliver");
 
   const error = typeof props.searchParams?.error === "string" ? props.searchParams.error : null;
+
+  const prisma = getPrisma();
 
   const shipment = await prisma.shipment.findUnique({
     where: { id: props.params.shipmentId },
@@ -35,6 +39,8 @@ export default async function GuardDeliverShipmentPage(props: PageProps) {
     const currentUser = await requireUser();
     if (currentUser.role !== "GUARD") redirect("/");
     if (!currentUser.locationId) redirect("/guard/deliver");
+
+    const prisma = getPrisma();
 
     const shipmentId = String(formData.get("shipmentId") ?? "");
     const signedByName = String(formData.get("signedByName") ?? "").trim();

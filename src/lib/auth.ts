@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { getPrisma } from "@/lib/db";
 
 const SESSION_COOKIE_NAME = "vaenviar_session";
 const SESSION_DAYS = 30;
@@ -17,6 +17,7 @@ function getSessionExpiry(): Date {
 }
 
 export async function createSessionForUser(userId: string): Promise<void> {
+  const prisma = getPrisma();
   const rawToken = crypto.randomBytes(32).toString("base64url");
   const tokenHash = sha256Base64Url(rawToken);
   const expiresAt = getSessionExpiry();
@@ -42,6 +43,7 @@ export async function createSessionForUser(userId: string): Promise<void> {
 }
 
 export async function getCurrentUser() {
+  const prisma = getPrisma();
   const cookieStore = await cookies();
   const rawToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!rawToken) return null;
@@ -70,6 +72,7 @@ export async function requireUser() {
 }
 
 export async function logoutCurrentSession(): Promise<void> {
+  const prisma = getPrisma();
   const cookieStore = await cookies();
   const rawToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (rawToken) {

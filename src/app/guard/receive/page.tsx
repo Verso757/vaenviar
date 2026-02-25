@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { getPrisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export default async function GuardReceiveListPage() {
   const user = await requireUser();
@@ -14,6 +16,7 @@ export default async function GuardReceiveListPage() {
     );
   }
 
+  const prisma = getPrisma();
   const shipments = await prisma.shipment.findMany({
     where: {
       toLocationId: user.locationId,
