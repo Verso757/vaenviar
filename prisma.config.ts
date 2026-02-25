@@ -3,10 +3,8 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-const databaseUrl = process.env["DATABASE_URL"];
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required for Prisma CLI");
-}
+const databaseUrl =
+  process.env["DATABASE_URL"] ?? "mysql://johndoe:randompassword@localhost:3306/mydb";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
