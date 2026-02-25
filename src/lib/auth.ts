@@ -22,13 +22,21 @@ export async function createSessionForUser(userId: string): Promise<void> {
   const tokenHash = sha256Base64Url(rawToken);
   const expiresAt = getSessionExpiry();
 
-  await prisma.session.create({
-    data: {
-      tokenHash,
+  try {
+    await prisma.session.create({
+      data: {
+        tokenHash,
+        userId,
+        expiresAt,
+      },
+    });
+  } catch (error) {
+    console.error("[auth] Failed to create session", {
       userId,
-      expiresAt,
-    },
-  });
+      message: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 
   const cookieStore = await cookies();
   cookieStore.set({
@@ -50,10 +58,18 @@ export async function getCurrentUser() {
 
   const tokenHash = sha256Base64Url(rawToken);
 
-  const session = await prisma.session.findUnique({
-    where: { tokenHash },
-    include: { user: true },
-  });
+  let session;
+  try {
+    session = await prisma.session.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    });
+  } catch (error) {
+    console.error("[auth] Failed to load session", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
 
   if (!session) return null;
   if (session.expiresAt <= new Date()) {

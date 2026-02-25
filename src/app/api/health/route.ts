@@ -5,12 +5,14 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const databaseUrlSet = Boolean(process.env.DATABASE_URL);
+  const nodeVersion = process.version;
 
   if (!databaseUrlSet) {
     return NextResponse.json(
       {
         ok: false,
         databaseUrlSet,
+        nodeVersion,
         db: { connected: false },
         hint: "Set DATABASE_URL in the deployment environment and redeploy/restart.",
       },
@@ -19,10 +21,26 @@ export async function GET() {
   }
 
   try {
-    const { PrismaClient } = await import("@prisma/client");
+    const { PrismaClient, Prisma } = await import("@prisma/client");
     const prisma = new PrismaClient();
 
+    const prismaClientVersion = Prisma.prismaVersion.client;
+
     await prisma.$queryRaw`SELECT 1`;
+
+    // Sanity checks for the auth path (login + home page).
+    let userCount: number | null = null;
+    let sessionCount: number | null = null;
+    try {
+      userCount = await prisma.user.count();
+    } catch {
+      userCount = null;
+    }
+    try {
+      sessionCount = await prisma.session.count();
+    } catch {
+      sessionCount = null;
+    }
 
     // Check whether migrations table exists and has rows.
     let migrationsApplied: boolean | null = null;
@@ -39,13 +57,21 @@ export async function GET() {
 
     await prisma.$disconnect();
 
-    return NextResponse.json({ ok: true, databaseUrlSet, db: { connected: true, migrationsApplied } });
+    return NextResponse.json({
+      ok: true,
+      databaseUrlSet,
+      nodeVersion,
+      prismaClientVersion,
+      db: { connected: true, migrationsApplied, userCount, sessionCount },
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    console.error("[health] DB check failed", error);
     return NextResponse.json(
       {
         ok: false,
         databaseUrlSet,
+        nodeVersion,
         db: { connected: false },
         error: message,
       },

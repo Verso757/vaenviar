@@ -29,13 +29,30 @@ export default async function LoginPage(props: PageProps) {
 
     if (!email || !password) redirect("/login?error=missing");
 
-    const dbUser = await prisma.user.findUnique({ where: { email } });
+    let dbUser;
+    try {
+      dbUser = await prisma.user.findUnique({ where: { email } });
+    } catch (e) {
+      console.error("[login] Failed to query user", e);
+      redirect("/login?error=server");
+    }
     if (!dbUser) redirect("/login?error=invalid");
 
-    const ok = await bcrypt.compare(password, dbUser.passwordHash);
+    let ok = false;
+    try {
+      ok = await bcrypt.compare(password, dbUser.passwordHash);
+    } catch (e) {
+      console.error("[login] Failed to verify password", e);
+      redirect("/login?error=server");
+    }
     if (!ok) redirect("/login?error=invalid");
 
-    await createSessionForUser(dbUser.id);
+    try {
+      await createSessionForUser(dbUser.id);
+    } catch (e) {
+      console.error("[login] Failed to create session", e);
+      redirect("/login?error=server");
+    }
     redirect("/");
   }
 
@@ -46,7 +63,11 @@ export default async function LoginPage(props: PageProps) {
 
       {error ? (
         <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error === "missing" ? "Faltan campos." : "Correo o contraseña inválidos."}
+          {error === "missing"
+            ? "Faltan campos."
+            : error === "invalid"
+              ? "Correo o contraseña inválidos."
+              : "Error del servidor. Revisa conexión a base de datos/variables de entorno y mira los logs."}
         </p>
       ) : null}
 
