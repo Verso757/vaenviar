@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,6 +25,23 @@ const nextBin = nextBinCandidates.find((candidate) => fs.existsSync(candidate));
 if (!nextBin) {
   console.error("[start] Could not find Next.js binary in node_modules.");
   process.exit(1);
+}
+
+// Some hosting panels run `npm start` without running `npm run build`.
+// Next.js requires a production build (the `.next` folder) to exist.
+const buildIdPath = path.join(rootDir, ".next", "BUILD_ID");
+if (!fs.existsSync(buildIdPath)) {
+  console.log("[start] .next build not found; running `next build`...");
+  const result = spawnSync(process.execPath, [nextBin, "build"], {
+    stdio: "inherit",
+    env: process.env,
+    cwd: rootDir,
+  });
+
+  if (result.status !== 0) {
+    console.error("[start] `next build` failed; aborting start.");
+    process.exit(result.status ?? 1);
+  }
 }
 
 const child = spawn(
