@@ -4,14 +4,50 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const databaseUrlSet = Boolean(process.env.DATABASE_URL);
+  const databaseUrlRaw = process.env.DATABASE_URL ?? "";
+  const databaseUrlSet = databaseUrlRaw.length > 0;
   const nodeVersion = process.version;
+
+  const databaseUrlLength = databaseUrlRaw.length;
+  let databaseUrlInfo:
+    | {
+        protocol?: string;
+        host?: string;
+        port?: string;
+        database?: string;
+        username?: string;
+        passwordSet?: boolean;
+        passwordLength?: number;
+        parseError?: string;
+      }
+    | null = null;
+
+  if (databaseUrlSet) {
+    try {
+      const url = new URL(databaseUrlRaw);
+      databaseUrlInfo = {
+        protocol: url.protocol,
+        host: url.hostname,
+        port: url.port,
+        database: url.pathname?.replace(/^\//, "") || "",
+        username: url.username,
+        passwordSet: Boolean(url.password),
+        passwordLength: url.password?.length ?? 0,
+      };
+    } catch (e) {
+      databaseUrlInfo = {
+        parseError: e instanceof Error ? e.message : String(e),
+      };
+    }
+  }
 
   if (!databaseUrlSet) {
     return NextResponse.json(
       {
         ok: false,
         databaseUrlSet,
+        databaseUrlLength,
+        databaseUrlInfo,
         nodeVersion,
         db: { connected: false },
         hint: "Set DATABASE_URL in the deployment environment and redeploy/restart.",
@@ -60,6 +96,8 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       databaseUrlSet,
+      databaseUrlLength,
+      databaseUrlInfo,
       nodeVersion,
       prismaClientVersion,
       db: { connected: true, migrationsApplied, userCount, sessionCount },
@@ -71,6 +109,8 @@ export async function GET() {
       {
         ok: false,
         databaseUrlSet,
+        databaseUrlLength,
+        databaseUrlInfo,
         nodeVersion,
         db: { connected: false },
         error: message,
