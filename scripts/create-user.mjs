@@ -40,7 +40,8 @@ if (locationCode) {
   locationId = location.id;
 }
 
-const passwordHash = await bcrypt.hash(password, 12);
+const disablePasswordHash = process.env.DISABLE_PASSWORD_HASH === "true";
+const passwordHash = disablePasswordHash ? password : await bcrypt.hash(password, 12);
 
 const user = await prisma.user.create({
   data: {

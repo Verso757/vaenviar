@@ -38,9 +38,17 @@ export default async function LoginPage(props: PageProps) {
     }
     if (!dbUser) redirect("/login?error=invalid");
 
+    const disablePasswordHash = process.env.DISABLE_PASSWORD_HASH === "true";
+
     let ok = false;
     try {
-      ok = await bcrypt.compare(password, dbUser.passwordHash);
+      const stored = dbUser.passwordHash;
+      const looksLikeBcrypt = typeof stored === "string" && stored.startsWith("$2");
+      if (disablePasswordHash || !looksLikeBcrypt) {
+        ok = password === stored;
+      } else {
+        ok = await bcrypt.compare(password, stored);
+      }
     } catch (e) {
       console.error("[login] Failed to verify password", e);
       redirect("/login?error=server");
