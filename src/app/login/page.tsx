@@ -32,7 +32,17 @@ export default async function LoginPage(props: PageProps) {
 
     let dbUser;
     try {
-      dbUser = await prisma.user.findUnique({ where: { email } });
+      dbUser = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          locationId: true,
+          passwordHash: true,
+        },
+      });
     } catch (e) {
       console.error("[login] Failed to query user", e);
       redirect("/login?error=server");

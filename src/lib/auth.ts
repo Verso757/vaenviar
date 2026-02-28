@@ -62,7 +62,17 @@ export async function getCurrentUser() {
   try {
     session = await prisma.session.findUnique({
       where: { tokenHash },
-      include: { user: true },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            locationId: true,
+          },
+        },
+      },
     });
   } catch (error) {
     console.error("[auth] Failed to load session", {
