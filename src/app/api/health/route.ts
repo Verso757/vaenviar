@@ -67,6 +67,7 @@ export async function GET() {
     // Sanity checks for the auth path (login + home page).
     let userCount: number | null = null;
     let sessionCount: number | null = null;
+    let writeTest: { ok: boolean; error?: string } | null = null;
     try {
       userCount = await prisma.user.count();
     } catch {
@@ -76,6 +77,28 @@ export async function GET() {
       sessionCount = await prisma.session.count();
     } catch {
       sessionCount = null;
+    }
+
+    // Optional write permission test (INSERT/DELETE) since login creates a Session.
+    try {
+      const firstUser = await prisma.user.findFirst({ select: { id: true } });
+      if (!firstUser) {
+        writeTest = { ok: false, error: "No users found to run write test." };
+      } else {
+        const tokenHash = `health_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        const created = await prisma.session.create({
+          data: {
+            tokenHash,
+            userId: firstUser.id,
+            expiresAt: new Date(Date.now() + 60_000),
+          },
+          select: { id: true },
+        });
+        await prisma.session.delete({ where: { id: created.id } });
+        writeTest = { ok: true };
+      }
+    } catch (e) {
+      writeTest = { ok: false, error: e instanceof Error ? e.message : String(e) };
     }
 
     // Check whether migrations table exists and has rows.
@@ -100,7 +123,7 @@ export async function GET() {
       databaseUrlInfo,
       nodeVersion,
       prismaClientVersion,
-      db: { connected: true, migrationsApplied, userCount, sessionCount },
+      db: { connected: true, migrationsApplied, userCount, sessionCount, writeTest },
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
