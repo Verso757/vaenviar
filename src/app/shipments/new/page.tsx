@@ -112,91 +112,88 @@ export default async function NewShipmentPage(props: PageProps) {
   const defaultFromLocationId = user.locationId ?? "";
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-semibold">Crear envío</h1>
-      <p className="mt-2 text-sm text-gray-600">Genera el envío y luego imprime la etiqueta con QR.</p>
+    <main className="app-shell max-w-3xl">
+      <section className="app-card">
+        <h1 className="page-title">Crear envío</h1>
+        <p className="page-subtitle">Genera el envío y luego imprime la etiqueta con QR.</p>
 
-      {error ? (
-        <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error === "missing" ? "Faltan campos." : null}
-          {error === "same_location" ? "Origen y destino no pueden ser el mismo." : null}
-          {error === "recipient_not_found" ? "No existe el destinatario (correo)." : null}
-          {error === "server" ? "Error del servidor al crear el envío. Revisa logs y vuelve a intentar." : null}
-        </p>
-      ) : null}
+        {error ? (
+          <p className="alert-error mt-4">
+            {error === "missing" ? "Faltan campos." : null}
+            {error === "same_location" ? "Origen y destino no pueden ser el mismo." : null}
+            {error === "recipient_not_found" ? "No existe el destinatario (correo)." : null}
+            {error === "server" ? "Error del servidor al crear el envío. Revisa logs y vuelve a intentar." : null}
+          </p>
+        ) : null}
 
-      <form action={createShipmentAction} className="mt-6 space-y-4">
-        <label className="block">
-          <span className="text-sm">Origen (ubicación)</span>
-          <select
-            name="fromLocationId"
-            className="mt-1 w-full rounded border px-3 py-2"
-            defaultValue={defaultFromLocationId}
-            required
-          >
-            <option value="" disabled>
-              Selecciona...
-            </option>
-            {locations.map((loc) => (
-              <option key={loc.id} value={loc.id}>
-                {loc.code} — {loc.name}
+        <form action={createShipmentAction} className="mt-6 space-y-4">
+          <label className="block">
+            <span className="field-label">Origen (ubicación)</span>
+            <select
+              name="fromLocationId"
+              className="input-base"
+              defaultValue={defaultFromLocationId}
+              required
+            >
+              <option value="" disabled>
+                Selecciona...
               </option>
-            ))}
-          </select>
-        </label>
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.code} — {loc.name}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label className="block">
-          <span className="text-sm">Destino (ubicación)</span>
-          <select
-            name="toLocationId"
-            className="mt-1 w-full rounded border px-3 py-2"
-            defaultValue=""
-            required
-          >
-            <option value="" disabled>
-              Selecciona...
-            </option>
-            {locations.map((loc) => (
-              <option key={loc.id} value={loc.id}>
-                {loc.code} — {loc.name}
+          <label className="block">
+            <span className="field-label">Destino (ubicación)</span>
+            <select name="toLocationId" className="input-base" defaultValue="" required>
+              <option value="" disabled>
+                Selecciona...
               </option>
-            ))}
-          </select>
-        </label>
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.code} — {loc.name}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label className="block">
-          <span className="text-sm">Destinatario (correo)</span>
-          <input
-            name="recipientEmail"
-            type="email"
-            className="mt-1 w-full rounded border px-3 py-2"
-            placeholder="usuario@empresa.com"
-            required
-          />
-        </label>
+          <label className="block">
+            <span className="field-label">Destinatario (correo)</span>
+            <input
+              name="recipientEmail"
+              type="email"
+              className="input-base"
+              placeholder="usuario@empresa.com"
+              required
+            />
+          </label>
 
-        <label className="block">
-          <span className="text-sm">Número de cajas</span>
-          <input
-            name="packagesCount"
-            type="number"
-            min={1}
-            max={50}
-            defaultValue={1}
-            className="mt-1 w-full rounded border px-3 py-2"
-            required
-          />
-        </label>
+          <label className="block">
+            <span className="field-label">Número de cajas</span>
+            <input
+              name="packagesCount"
+              type="number"
+              min={1}
+              max={50}
+              defaultValue={1}
+              className="input-base"
+              required
+            />
+          </label>
 
-        <label className="block">
-          <span className="text-sm">Descripción (opcional)</span>
-          <textarea name="description" className="mt-1 w-full rounded border px-3 py-2" rows={3} />
-        </label>
+          <label className="block">
+            <span className="field-label">Descripción (opcional)</span>
+            <textarea name="description" className="input-base" rows={3} />
+          </label>
 
-        <button className="w-full rounded bg-black px-3 py-2 text-white" type="submit">
-          Crear e imprimir etiqueta
-        </button>
-      </form>
+          <button className="btn-primary w-full" type="submit">
+            Crear e imprimir etiqueta
+          </button>
+        </form>
+      </section>
     </main>
   );
 }

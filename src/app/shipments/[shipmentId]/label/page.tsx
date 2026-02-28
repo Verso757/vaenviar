@@ -33,36 +33,38 @@ export default async function ShipmentLabelPage(props: PageProps) {
   const qrDataUrl = await QRCode.toDataURL(qrText, { margin: 1, width: 256 });
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
+    <main className="app-shell max-w-3xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Etiqueta</h1>
+        <h1 className="page-title">Etiqueta</h1>
         <PrintButton />
       </div>
 
-      <div className="mt-6 rounded border p-6 print:border-0 print:p-0">
-        <div className="flex items-start gap-6">
+      <div className="app-card mt-6 print:border-0 print:p-0">
+        <div className="flex flex-col items-start gap-6 sm:flex-row">
           <div className="shrink-0">
             <Image src={qrDataUrl} alt="QR" width={256} height={256} />
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-gray-600">Código</p>
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              Código
+            </p>
             <p className="text-2xl font-semibold tracking-wide">{shipment.code}</p>
 
             <div className="mt-4 grid gap-2 text-sm">
               <div>
-                <span className="text-gray-600">Origen:</span> {shipment.fromLocation.code} — {shipment.fromLocation.name}
+                <span style={{ color: "var(--muted)" }}>Origen:</span> {shipment.fromLocation.code} — {shipment.fromLocation.name}
               </div>
               <div>
-                <span className="text-gray-600">Destino:</span> {shipment.toLocation.code} — {shipment.toLocation.name}
+                <span style={{ color: "var(--muted)" }}>Destino:</span> {shipment.toLocation.code} — {shipment.toLocation.name}
               </div>
               <div>
-                <span className="text-gray-600">Destinatario:</span> {shipment.recipient.name} ({shipment.recipient.email})
+                <span style={{ color: "var(--muted)" }}>Destinatario:</span> {shipment.recipient.name} ({shipment.recipient.email})
               </div>
               <div>
-                <span className="text-gray-600">Creado por:</span> {shipment.createdBy.name} ({shipment.createdBy.email})
+                <span style={{ color: "var(--muted)" }}>Creado por:</span> {shipment.createdBy.name} ({shipment.createdBy.email})
               </div>
               <div>
-                <span className="text-gray-600">Cajas:</span> {shipment.packages.length}
+                <span style={{ color: "var(--muted)" }}>Cajas:</span> {shipment.packages.length}
               </div>
             </div>
           </div>
@@ -83,7 +85,7 @@ export default async function ShipmentLabelPage(props: PageProps) {
         {shipment.description ? (
           <div className="mt-6 text-sm">
             <p className="font-medium">Descripción</p>
-            <p className="text-gray-700">{shipment.description}</p>
+            <p style={{ color: "var(--muted)" }}>{shipment.description}</p>
           </div>
         ) : null}
       </div>

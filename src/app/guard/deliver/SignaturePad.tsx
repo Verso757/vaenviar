@@ -80,10 +80,10 @@ export function SignaturePad() {
   }
 
   return (
-    <div className="rounded border p-4">
+    <div className="app-card">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium">Firma</p>
-        <button type="button" className="rounded border px-2 py-1 text-xs" onClick={clear}>
+        <button type="button" className="btn-secondary px-3 py-1 text-xs" onClick={clear}>
           Limpiar
         </button>
       </div>

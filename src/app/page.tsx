@@ -12,24 +12,26 @@ export default async function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">VaEnviar</h1>
+    <main className="app-shell">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="page-title">VaEnviar</h1>
         <form action={logoutAction}>
-          <button className="rounded border px-3 py-2 text-sm" type="submit">
+          <button className="btn-secondary" type="submit">
             Salir
           </button>
         </form>
       </div>
 
-      <p className="mt-4 text-sm text-gray-700">
+      <p className="mt-4 text-sm" style={{ color: "var(--muted)" }}>
         Sesión: <span className="font-medium">{user.name}</span> ({user.email})
       </p>
-      <p className="mt-1 text-sm text-gray-700">Rol: {user.role}</p>
+      <p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
+        Rol: {user.role}
+      </p>
 
-      <div className="mt-8 rounded border p-4">
+      <div className="app-card mt-8">
         <p className="text-sm font-medium">Siguientes pasos</p>
-        <ul className="mt-2 list-inside list-disc text-sm text-gray-700">
+        <ul className="mt-2 list-inside list-disc text-sm" style={{ color: "var(--muted)" }}>
           <li>Crear envío</li>
           <li>Vista de pendientes para vigilancia</li>
           <li>Handover a chofer con checklist</li>
@@ -37,22 +39,22 @@ export default async function Home() {
         </ul>
       </div>
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex flex-wrap gap-3">
         {user.role !== "GUARD" ? (
-          <Link href="/shipments/new" className="rounded bg-black px-3 py-2 text-sm text-white">
+          <Link href="/shipments/new" className="btn-primary">
             Crear envío
           </Link>
         ) : null}
 
         {user.role === "GUARD" ? (
           <>
-            <Link href="/guard/pickup" className="rounded border px-3 py-2 text-sm">
+            <Link href="/guard/pickup" className="btn-secondary">
               Entregar a chofer
             </Link>
-            <Link href="/guard/receive" className="rounded border px-3 py-2 text-sm">
+            <Link href="/guard/receive" className="btn-secondary">
               Recibir
             </Link>
-            <Link href="/guard/deliver" className="rounded border px-3 py-2 text-sm">
+            <Link href="/guard/deliver" className="btn-secondary">
               Entregar (firma)
             </Link>
           </>
@@ -61,7 +63,7 @@ export default async function Home() {
 
       <p className="mt-6 text-sm">
         Ir a{" "}
-        <Link href="/login" className="underline">
+        <Link href="/login" className="underline" style={{ color: "var(--primary)" }}>
           Login
         </Link>
         .

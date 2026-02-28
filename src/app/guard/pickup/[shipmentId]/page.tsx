@@ -101,21 +101,21 @@ export default async function GuardPickupShipmentPage(props: PageProps) {
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-semibold">Entrega a chofer</h1>
-      <p className="mt-2 text-sm text-gray-600">{shipment.code}</p>
+    <main className="app-shell">
+      <h1 className="page-title">Entrega a chofer</h1>
+      <p className="page-subtitle">{shipment.code}</p>
 
       {error ? (
-        <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <p className="alert-error mt-4">
           {error === "missing" ? "Falta nombre del chofer." : "Error"}
         </p>
       ) : null}
 
-      <div className="mt-6 rounded border p-4">
-        <div className="text-sm text-gray-700">
+      <div className="app-card mt-6">
+        <div className="text-sm" style={{ color: "var(--muted)" }}>
           Destino: {shipment.toLocation.code} — {shipment.toLocation.name}
         </div>
-        <div className="mt-1 text-sm text-gray-700">
+        <div className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
           Destinatario: {shipment.recipient.name} ({shipment.recipient.email})
         </div>
       </div>
@@ -124,11 +124,11 @@ export default async function GuardPickupShipmentPage(props: PageProps) {
         <input type="hidden" name="shipmentId" value={shipment.id} />
 
         <label className="block">
-          <span className="text-sm">Chofer (nombre)</span>
-          <input name="driverName" className="mt-1 w-full rounded border px-3 py-2" required />
+          <span className="field-label">Chofer (nombre)</span>
+          <input name="driverName" className="input-base" required />
         </label>
 
-        <div className="rounded border p-4">
+        <div className="app-card">
           <p className="text-sm font-medium">Checklist cajas entregadas</p>
           <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
             {shipment.packages.map((p) => (
@@ -140,7 +140,7 @@ export default async function GuardPickupShipmentPage(props: PageProps) {
           </div>
         </div>
 
-        <button className="w-full rounded bg-black px-3 py-2 text-white" type="submit">
+        <button className="btn-primary w-full" type="submit">
           Confirmar entrega a chofer
         </button>
       </form>

@@ -9,9 +9,11 @@ export default async function GuardPickupListPage() {
   if (user.role !== "GUARD") return null;
   if (!user.locationId) {
     return (
-      <main className="mx-auto max-w-3xl p-6">
-        <h1 className="text-2xl font-semibold">Entregar a chofer</h1>
-        <p className="mt-2 text-sm text-gray-700">Tu usuario no tiene ubicación asignada.</p>
+      <main className="app-shell">
+        <section className="app-card">
+          <h1 className="page-title">Entregar a chofer</h1>
+          <p className="page-subtitle">Tu usuario no tiene ubicación asignada.</p>
+        </section>
       </main>
     );
   }
@@ -34,31 +36,33 @@ export default async function GuardPickupListPage() {
   });
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-semibold">Entregar a chofer</h1>
-      <p className="mt-2 text-sm text-gray-600">Pendientes por entregar (origen = tu ubicación).</p>
+    <main className="app-shell">
+      <h1 className="page-title">Entregar a chofer</h1>
+      <p className="page-subtitle">Pendientes por entregar (origen = tu ubicación).</p>
 
       <div className="mt-6 space-y-3">
         {shipments.length === 0 ? (
-          <p className="text-sm text-gray-700">No hay envíos pendientes.</p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            No hay envíos pendientes.
+          </p>
         ) : (
           shipments.map((s) => (
-            <Link
-              key={s.id}
-              href={`/guard/pickup/${s.id}`}
-              className="block rounded border p-4 hover:bg-gray-50"
-            >
+            <Link key={s.id} href={`/guard/pickup/${s.id}`} className="list-card">
               <div className="flex items-center justify-between">
                 <div className="font-medium">{s.code}</div>
-                <div className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleString()}</div>
+                <div className="text-xs" style={{ color: "var(--muted)" }}>
+                  {new Date(s.createdAt).toLocaleString()}
+                </div>
               </div>
-              <div className="mt-2 text-sm text-gray-700">
+              <div className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
                 Destino: {s.toLocation.code} — {s.toLocation.name}
               </div>
-              <div className="mt-1 text-sm text-gray-700">
+              <div className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
                 Destinatario: {s.recipient.name} ({s.recipient.email})
               </div>
-              <div className="mt-1 text-sm text-gray-700">Cajas: {s.packages.length}</div>
+              <div className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
+                Cajas: {s.packages.length}
+              </div>
             </Link>
           ))
         )}

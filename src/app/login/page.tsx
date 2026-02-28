@@ -77,57 +77,53 @@ export default async function LoginPage(props: PageProps) {
   }
 
   return (
-    <main className="mx-auto max-w-md p-6">
-      <h1 className="text-2xl font-semibold">VaEnviar</h1>
-      <p className="mt-2 text-sm text-gray-600">Inicia sesión para continuar.</p>
+    <main className="app-shell max-w-lg">
+      <section className="app-card">
+        <h1 className="page-title">VaEnviar</h1>
+        <p className="page-subtitle">Inicia sesión para continuar.</p>
 
-      {error ? (
-        <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error === "missing"
-            ? "Faltan campos."
-            : error === "invalid"
-              ? "Correo o contraseña inválidos."
-              : "Error del servidor. Revisa conexión a base de datos/variables de entorno y mira los logs."}
+        {error ? (
+          <p className="alert-error mt-4">
+            {error === "missing"
+              ? "Faltan campos."
+              : error === "invalid"
+                ? "Correo o contraseña inválidos."
+                : "Error del servidor. Revisa conexión a base de datos/variables de entorno y mira los logs."}
+          </p>
+        ) : null}
+
+        <form action={loginAction} className="mt-6 space-y-4">
+          <label className="block">
+            <span className="field-label">Correo</span>
+            <input name="email" type="email" className="input-base" autoComplete="email" required />
+          </label>
+
+          <label className="block">
+            <span className="field-label">Contraseña</span>
+            <input
+              name="password"
+              type="password"
+              className="input-base"
+              autoComplete="current-password"
+              required
+            />
+          </label>
+
+          <button className="btn-primary w-full" type="submit">
+            Entrar
+          </button>
+        </form>
+
+        <p className="mt-6 text-xs" style={{ color: "var(--muted)" }}>
+          Nota: crea usuarios con el script <code className="rounded bg-slate-100 px-1">npm run user:create</code>.
         </p>
-      ) : null}
 
-      <form action={loginAction} className="mt-6 space-y-4">
-        <label className="block">
-          <span className="text-sm">Correo</span>
-          <input
-            name="email"
-            type="email"
-            className="mt-1 w-full rounded border px-3 py-2"
-            autoComplete="email"
-            required
-          />
-        </label>
-
-        <label className="block">
-          <span className="text-sm">Contraseña</span>
-          <input
-            name="password"
-            type="password"
-            className="mt-1 w-full rounded border px-3 py-2"
-            autoComplete="current-password"
-            required
-          />
-        </label>
-
-        <button className="w-full rounded bg-black px-3 py-2 text-white" type="submit">
-          Entrar
-        </button>
-      </form>
-
-      <p className="mt-6 text-xs text-gray-500">
-        Nota: crea usuarios con el script <code className="rounded bg-gray-100 px-1">npm run user:create</code>.
-      </p>
-
-      <p className="mt-2 text-xs">
-        <Link href="/" className="underline">
-          Volver
-        </Link>
-      </p>
+        <p className="mt-2 text-xs">
+          <Link href="/" className="underline" style={{ color: "var(--primary)" }}>
+            Volver
+          </Link>
+        </p>
+      </section>
     </main>
   );
 }

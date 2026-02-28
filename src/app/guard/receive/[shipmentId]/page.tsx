@@ -81,15 +81,15 @@ export default async function GuardReceiveShipmentPage(props: PageProps) {
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-semibold">Recibo en destino</h1>
-      <p className="mt-2 text-sm text-gray-600">{shipment.code}</p>
+    <main className="app-shell">
+      <h1 className="page-title">Recibo en destino</h1>
+      <p className="page-subtitle">{shipment.code}</p>
 
-      <div className="mt-6 rounded border p-4">
-        <div className="text-sm text-gray-700">
+      <div className="app-card mt-6">
+        <div className="text-sm" style={{ color: "var(--muted)" }}>
           Origen: {shipment.fromLocation.code} — {shipment.fromLocation.name}
         </div>
-        <div className="mt-1 text-sm text-gray-700">
+        <div className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
           Destinatario: {shipment.recipient.name} ({shipment.recipient.email})
         </div>
       </div>
@@ -97,7 +97,7 @@ export default async function GuardReceiveShipmentPage(props: PageProps) {
       <form action={receiveAction} className="mt-6 space-y-4">
         <input type="hidden" name="shipmentId" value={shipment.id} />
 
-        <div className="rounded border p-4">
+        <div className="app-card">
           <p className="text-sm font-medium">Checklist cajas recibidas</p>
           <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
             {shipment.packages.map((p) => (
@@ -109,7 +109,7 @@ export default async function GuardReceiveShipmentPage(props: PageProps) {
           </div>
         </div>
 
-        <button className="w-full rounded bg-black px-3 py-2 text-white" type="submit">
+        <button className="btn-primary w-full" type="submit">
           Confirmar recibido
         </button>
       </form>
