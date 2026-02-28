@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
+import { ensureRuntimeEnv } from "@/lib/runtime-env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  ensureRuntimeEnv(["DATABASE_URL"]);
+
   const databaseUrlRaw = process.env.DATABASE_URL ?? "";
   const databaseUrlSet = databaseUrlRaw.length > 0;
   const nodeVersion = process.version;

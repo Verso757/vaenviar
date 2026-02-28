@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { getPrisma } from "@/lib/db";
 import { createSessionForUser, getCurrentUser } from "@/lib/auth";
+import { ensureRuntimeEnv } from "@/lib/runtime-env";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export default async function LoginPage(props: PageProps) {
     }
     if (!dbUser) redirect("/login?error=invalid");
 
+    ensureRuntimeEnv(["DISABLE_PASSWORD_HASH"]);
     const disablePasswordHash = process.env.DISABLE_PASSWORD_HASH === "true";
 
     let ok = false;
