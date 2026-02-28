@@ -16,6 +16,69 @@ console.log(`[start] Starting Next.js on ${hostname}:${port}`);
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(scriptsDir, "..");
 
+function parseDotenv(content) {
+  const env = {};
+  const lines = content.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eqIndex = trimmed.indexOf("=");
+    if (eqIndex <= 0) continue;
+    const key = trimmed.slice(0, eqIndex).trim();
+    let value = trimmed.slice(eqIndex + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    env[key] = value;
+  }
+  return env;
+}
+
+function tryLoadEnvFile(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) return false;
+    const content = fs.readFileSync(filePath, "utf8");
+    const parsed = parseDotenv(content);
+    let applied = 0;
+    for (const [key, value] of Object.entries(parsed)) {
+      if (process.env[key] === undefined) {
+        process.env[key] = value;
+        applied++;
+      }
+    }
+    console.log(`[start] Loaded env file: ${filePath} (applied ${applied} vars)`);
+    return true;
+  } catch (e) {
+    console.warn(`[start] Failed to load env file: ${filePath}`, e);
+    return false;
+  }
+}
+
+function loadEnvIfNeeded() {
+  // If the hosting platform doesn't inject env vars into runtime,
+  // try reading them from common .env locations.
+  if (process.env.DATABASE_URL) return;
+
+  const candidates = [];
+
+  // Search upward from rootDir for `.env` and `.builds/config/.env`.
+  let current = rootDir;
+  for (let i = 0; i < 7; i++) {
+    candidates.push(path.join(current, ".env"));
+    candidates.push(path.join(current, ".builds", "config", ".env"));
+    candidates.push(path.join(current, "public_html", ".builds", "config", ".env"));
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+
+  for (const candidate of candidates) {
+    if (tryLoadEnvFile(candidate) && process.env.DATABASE_URL) return;
+  }
+}
+
+loadEnvIfNeeded();
+
 const nextBinCandidates = [
   path.join(rootDir, "node_modules", "next", "dist", "bin", "next"),
   path.join(rootDir, "node_modules", "next", "dist", "bin", "next.js"),
