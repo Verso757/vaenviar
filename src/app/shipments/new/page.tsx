@@ -62,39 +62,49 @@ export default async function NewShipmentPage(props: PageProps) {
 
     const code = generateShipmentCode();
 
-    const created = await prisma.shipment.create({
-      data: {
-        code,
-        status: "WAITING_PICKUP",
-        description: description || null,
-        fromLocationId,
-        toLocationId,
-        createdById: currentUser.id,
-        recipientId: recipient.id,
-        packages: {
-          create: Array.from({ length: packagesCount }, (_, idx) => ({
-            sequence: idx + 1,
-            label: `Caja ${idx + 1}`,
-          })),
-        },
-        events: {
-          create: {
-            type: "CREATED",
-            locationId: fromLocationId,
-            userId: currentUser.id,
-            payload: {
-              packagesCount,
+    let created;
+    try {
+      created = await prisma.shipment.create({
+        data: {
+          code,
+          status: "WAITING_PICKUP",
+          description: description || null,
+          fromLocationId,
+          toLocationId,
+          createdById: currentUser.id,
+          recipientId: recipient.id,
+          packages: {
+            create: Array.from({ length: packagesCount }, (_, idx) => ({
+              sequence: idx + 1,
+              label: `Caja ${idx + 1}`,
+            })),
+          },
+          events: {
+            create: {
+              type: "CREATED",
+              locationId: fromLocationId,
+              userId: currentUser.id,
+              payload: {
+                packagesCount,
+              },
             },
           },
         },
-      },
-      select: { id: true },
-    });
+        select: { id: true },
+      });
+    } catch (e) {
+      console.error("[shipments/new] Failed to create shipment", e);
+      redirect("/shipments/new?error=server");
+    }
 
-    await sendShipmentMilestoneEmail({
-      shipmentId: created.id,
-      event: "CREATED",
-    });
+    try {
+      await sendShipmentMilestoneEmail({
+        shipmentId: created.id,
+        event: "CREATED",
+      });
+    } catch (e) {
+      console.error("[shipments/new] Failed to send CREATED email", e);
+    }
 
     redirect(`/shipments/${created.id}/label`);
   }
@@ -111,6 +121,7 @@ export default async function NewShipmentPage(props: PageProps) {
           {error === "missing" ? "Faltan campos." : null}
           {error === "same_location" ? "Origen y destino no pueden ser el mismo." : null}
           {error === "recipient_not_found" ? "No existe el destinatario (correo)." : null}
+          {error === "server" ? "Error del servidor al crear el envío. Revisa logs y vuelve a intentar." : null}
         </p>
       ) : null}
 
