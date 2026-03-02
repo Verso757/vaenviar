@@ -31,7 +31,7 @@ export default async function LoginPage(props: PageProps) {
 
     let dbUser:
       | {
-          id: string;
+          id: string | number;
           passwordHash: string;
         }
       | undefined;
@@ -65,7 +65,7 @@ export default async function LoginPage(props: PageProps) {
     if (!ok) redirect("/login?error=invalid");
 
     try {
-      await createSessionForUser(dbUser.id);
+      await createSessionForUser(String(dbUser.id));
     } catch (e) {
       console.error("[login] Failed to create session", e);
       redirect("/login?error=server");
