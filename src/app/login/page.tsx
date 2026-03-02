@@ -30,19 +30,20 @@ export default async function LoginPage(props: PageProps) {
 
     if (!email || !password) redirect("/login?error=missing");
 
-    let dbUser;
+    let dbUser:
+      | {
+          id: string;
+          passwordHash: string;
+        }
+      | undefined;
     try {
-      dbUser = await prisma.user.findUnique({
-        where: { email },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          locationId: true,
-          passwordHash: true,
-        },
-      });
+      const rows = (await prisma.$queryRaw`
+        SELECT id, passwordHash
+        FROM \`User\`
+        WHERE email = ${email}
+        LIMIT 1
+      `) as Array<{ id: string; passwordHash: string }>;
+      dbUser = rows[0];
     } catch (e) {
       console.error("[login] Failed to query user", e);
       redirect("/login?error=server");
