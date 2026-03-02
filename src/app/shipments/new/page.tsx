@@ -55,7 +55,16 @@ export default async function NewShipmentPage(props: PageProps) {
       redirect("/shipments/new?error=same_location");
     }
 
-    const recipient = await prisma.user.findUnique({ where: { email: recipientEmail } });
+    let recipient;
+    try {
+      recipient = await prisma.user.findUnique({
+        where: { email: recipientEmail },
+        select: { id: true },
+      });
+    } catch (e) {
+      console.error("[shipments/new] Failed to lookup recipient", e);
+      redirect("/shipments/new?error=server");
+    }
     if (!recipient) {
       redirect("/shipments/new?error=recipient_not_found");
     }
