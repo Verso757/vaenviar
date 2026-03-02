@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { getPrisma } from "@/lib/db";
 import { createSessionForUser, getCurrentUser } from "@/lib/auth";
-import { ensureRuntimeEnv } from "@/lib/runtime-env";
 
 export const dynamic = "force-dynamic";
 
@@ -50,17 +49,14 @@ export default async function LoginPage(props: PageProps) {
     }
     if (!dbUser) redirect("/login?error=invalid");
 
-    ensureRuntimeEnv(["DISABLE_PASSWORD_HASH"]);
-    const disablePasswordHash = process.env.DISABLE_PASSWORD_HASH === "true";
-
     let ok = false;
     try {
       const stored = dbUser.passwordHash;
       const looksLikeBcrypt = typeof stored === "string" && stored.startsWith("$2");
-      if (disablePasswordHash || !looksLikeBcrypt) {
-        ok = password === stored;
-      } else {
+      if (looksLikeBcrypt) {
         ok = await bcrypt.compare(password, stored);
+      } else {
+        ok = password === stored;
       }
     } catch (e) {
       console.error("[login] Failed to verify password", e);
